@@ -1,53 +1,57 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import '../services/shared_prefs.dart';
+import 'package:dio/dio.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _RegisterScreenState createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   bool _isLoading = false;
 
-  Future<void> _login() async {
+  Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
       _isLoading = true;
     });
 
-    const String apiUrl = "http://127.0.0.1:8000/api/login";
+    const String apiUrl = "http://127.0.0.1:8000/api/register";
 
     try {
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
+      Dio dio = Dio();
+      dio.options.headers['Content-Type'] = 'application/json';
+
+      final response = await dio.post(
+        apiUrl,
+        data: {
+          'name': _nameController.text.trim(),
           'email': _emailController.text.trim(),
           'password': _passwordController.text,
-        }),
+        },
       );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        String token = data['access_token'];
-
-        await SharedPrefsService.saveToken(token);
-
-        Navigator.pushReplacementNamed(context, '/home');
+      if (response.statusCode == 201) {
+        _showSuccess("Usuário registrado com sucesso!");
+        Navigator.pushReplacementNamed(context, '/login');
       } else {
-        _showError('Erro de login: ${response.body}');
+        _showError("Erro ao registrar: ${response.data['message']}");
       }
-    } catch (e) {
-      _showError('Erro: $e');
+    } on DioException catch (e) {
+      String errorMessage = "Erro desconhecido.";
+      if (e.response != null) {
+        errorMessage = e.response?.data['message'] ?? "Erro no servidor.";
+      } else if (e.type == DioExceptionType.connectionTimeout) {
+        errorMessage = "Erro de conexão. Tente novamente.";
+      }
+      _showError(errorMessage);
     } finally {
       setState(() {
         _isLoading = false;
@@ -60,6 +64,15 @@ class _LoginScreenState extends State<LoginScreen> {
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  void _showSuccess(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
       ),
     );
   }
@@ -80,18 +93,15 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         child: Center(
           child: SingleChildScrollView(
-            reverse: false,
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Form(
               key: _formKey,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Logo Placeholder
                   const SizedBox(height: 20),
                   Container(
                     height: 100,
-                    width: 250,
+                    width: 200,
                     child: Center(
                       child: Image.asset(
                         'assets/images/dumbbell.png',
@@ -99,25 +109,49 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 30),
-
                   Text(
-                    "Bem-vindo!",
+                    "Registrar-se",
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
                   ),
-                  const SizedBox(height: 8),
                   Text(
-                    "Faça login para acessar o app.",
+                    "Preencha os campos para criar sua conta.",
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: Colors.white70,
                         ),
                   ),
                   const SizedBox(height: 30),
-
+                  TextFormField(
+                    controller: _nameController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      labelText: "Nome",
+                      labelStyle: const TextStyle(color: Colors.white),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.1),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.transparent),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide:
+                            BorderSide(color: Colors.white.withOpacity(0.3)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.blueAccent),
+                      ),
+                      prefixIcon: const Icon(Icons.person, color: Colors.white),
+                    ),
+                    validator: (value) => value == null || value.isEmpty
+                        ? "Por favor, insira seu nome."
+                        : null,
+                  ),
+                  const SizedBox(height: 20),
                   TextFormField(
                     controller: _emailController,
                     style: const TextStyle(color: Colors.white),
@@ -155,7 +189,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                   ),
                   const SizedBox(height: 20),
-
                   TextFormField(
                     controller: _passwordController,
                     style: const TextStyle(color: Colors.white),
@@ -191,37 +224,28 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                   ),
                   const SizedBox(height: 30),
-
                   _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : ElevatedButton(
-                          onPressed: _login,
+                          onPressed: _register,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF06D6A0),
-                            foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(
                                 vertical: 16, horizontal: 32),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
                           ),
                           child: const Text(
-                            "Entrar",
+                            "Registrar",
                             style: TextStyle(fontSize: 16),
                           ),
                         ),
                   const SizedBox(height: 20),
-
                   TextButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, '/register');
+                      Navigator.pushReplacementNamed(context, '/login');
                     },
-                    child: const Text(
-                      "Registrar-se",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Text(
+                      "Já tem uma conta? Faça login",
+                      style: TextStyle(color: Colors.white),
                     ),
                   ),
                 ],

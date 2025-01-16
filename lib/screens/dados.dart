@@ -22,19 +22,16 @@ class _DadosState extends State<Dados> {
 
   Future<void> fetchUserData() async {
     try {
-      // Retrieve token from SharedPreferences
       String? token = await SharedPrefsService.getToken();
       if (token == null || token.isEmpty) {
         throw Exception("No token found. Please log in.");
       }
 
-      // Make the API request
       final response = await Dio().get(
         'http://127.0.0.1:8000/api/dados',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
-      // Verify the response format and parse correctly
       if (response.statusCode == 200) {
         List<dynamic> responseData =
             response.data is String ? jsonDecode(response.data) : response.data;
@@ -44,7 +41,7 @@ class _DadosState extends State<Dados> {
           isLoading = false;
         });
       } else {
-        throw Exception('Failed to load data: ${response.statusCode}');
+        throw Exception('Não possui dados ainda');
       }
     } catch (e) {
       setState(() {
@@ -52,7 +49,7 @@ class _DadosState extends State<Dados> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to load data: $e'),
+          content: Text('Você não possui dados ainda '),
           backgroundColor: Colors.red,
         ),
       );
@@ -62,28 +59,65 @@ class _DadosState extends State<Dados> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : userData.isEmpty
-              ? const Center(child: Text("No data available"))
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16.0),
-                  itemCount: userData.length,
-                  itemBuilder: (context, index) {
-                    final data = userData[index];
-                    return buildSingleCard(data);
-                  },
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color.fromRGBO(7, 59, 76, 1),
+              Color.fromRGBO(10, 87, 102, 1),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: isLoading
+            ? const Center(
+                child: CircularProgressIndicator(
+                  color: Colors.white,
                 ),
+              )
+            : userData.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(
+                          Icons.info_outline,
+                          size: 80,
+                          color: Colors.white70,
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          "No data available",
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16.0),
+                    itemCount: userData.length,
+                    itemBuilder: (context, index) {
+                      final data = userData[index];
+                      return buildSingleCard(data);
+                    },
+                  ),
+      ),
     );
   }
 
   Widget buildSingleCard(Map<String, dynamic> data) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16.0),
-      elevation: 3,
+      elevation: 6,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8.0),
+        borderRadius: BorderRadius.circular(12.0),
       ),
+      shadowColor: Colors.black54,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -109,21 +143,28 @@ class _DadosState extends State<Dados> {
 
   Widget buildRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color.fromRGBO(7, 59, 76, 1),
+              ),
             ),
           ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 16,
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.black87,
+              ),
             ),
           ),
         ],

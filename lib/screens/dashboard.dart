@@ -23,7 +23,7 @@ class Dashboard extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Text(
-              'Acesse sua ficha e suas medidas utilizando a barra superior da página.',
+              'Acesse sua ficha e suas medidas utilizando a barra superior da página ou acesse o site para sua versao completa',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: const Color.fromARGB(255, 221, 221, 221),

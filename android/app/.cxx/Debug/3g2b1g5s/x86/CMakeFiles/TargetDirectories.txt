@@ -1,0 +1,2 @@
+C:/Users/raulzovisk/Desktop/TCC_MOVEL/android/app/.cxx/Debug/3g2b1g5s/x86/CMakeFiles/edit_cache.dir
+C:/Users/raulzovisk/Desktop/TCC_MOVEL/android/app/.cxx/Debug/3g2b1g5s/x86/CMakeFiles/rebuild_cache.dir

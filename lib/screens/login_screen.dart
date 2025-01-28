@@ -17,6 +17,48 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _isLoading = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _checkIfLoggedIn();
+  }
+
+  Future<void> _checkIfLoggedIn() async {
+    String? token = await SharedPrefsService.getToken();
+
+    if (token != null) {
+      // Tenta validar o token se necessário (opcional)
+      final bool isValid = await _validateToken(token);
+
+      if (isValid) {
+        // Redireciona para a tela principal
+        Navigator.pushReplacementNamed(context, '/home');
+      }
+    }
+  }
+
+  Future<bool> _validateToken(String token) async {
+    const String apiUrl = "https://gynworkouts.domcloud.dev/api/validate-token";
+
+    try {
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return true; // Token válido
+      }
+    } catch (e) {
+      debugPrint("Erro ao validar token: $e");
+    }
+
+    return false; // Token inválido
+  }
+
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -24,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = true;
     });
 
-    const String apiUrl = "http://127.0.0.1:8000/api/login";
+    const String apiUrl = "https://gynworkouts.domcloud.dev/api/login";
 
     try {
       final response = await http.post(

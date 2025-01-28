@@ -23,7 +23,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _isLoading = true;
     });
 
-    const String apiUrl = "http://127.0.0.1:8000/api/register";
+    const String apiUrl = "https://gynworkouts.domcloud.dev/api/register";
 
     try {
       Dio dio = Dio();

@@ -28,7 +28,7 @@ class _FichasState extends State<Fichas> {
         throw Exception("Token não encontrado.");
 
       final response = await Dio().get(
-        'http://127.0.0.1:8000/api/fichas',
+        'https://gynworkouts.domcloud.dev/api/fichas',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 

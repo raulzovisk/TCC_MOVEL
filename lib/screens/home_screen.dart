@@ -58,15 +58,26 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _launchURL(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
+    final Uri uri = Uri.parse(url);
+
+    if (!await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication, // Abre no navegador padrão
+    )) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Não foi possível abrir o link: $url',
+            style: const TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
   Future<void> _logout() async {
-    const String apiUrl = "http://127.0.0.1:8000/api/logout";
+    const String apiUrl = "https://gynworkouts.domcloud.dev/api/logout";
 
     try {
       // Retrieve the token
@@ -84,8 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (response.statusCode == 200) {
         _showSuccess("Deslogado com sucesso!");
-        await SharedPrefsService
-            .clearToken(); // Clear token after successful logout
+        await SharedPrefsService.clearToken();
         Navigator.pushReplacementNamed(context, '/login');
       } else {
         _showError("Erro ao deslogar: ${response.data['message']}");
@@ -217,7 +227,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                onTap: () => _launchURL('https://www.yourwebsite.com'),
+                onTap: () => _launchURL('https://gynworkouts.domcloud.dev'),
               ),
               const Divider(color: Colors.white54),
               ListTile(

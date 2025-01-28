@@ -28,7 +28,7 @@ class _DadosState extends State<Dados> {
       }
 
       final response = await Dio().get(
-        'http://127.0.0.1:8000/api/dados',
+        'https://gynworkouts.domcloud.dev/api/dados',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
@@ -111,32 +111,47 @@ class _DadosState extends State<Dados> {
   }
 
   Widget buildSingleCard(Map<String, dynamic> data) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16.0),
-      elevation: 6,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      shadowColor: Colors.black54,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            buildRow('Data da Medida', data['data_medida']),
-            buildRow('Peso', '${data['peso']} kg'),
-            buildRow('Altura', '${data['altura']} cm'),
-            buildRow('Cintura', '${data['cintura']} cm'),
-            buildRow('Quadril', '${data['quadril']} cm'),
-            buildRow('Peito', '${data['peito']} cm'),
-            buildRow('Braço Direito', '${data['braco_direito']} cm'),
-            buildRow('Braço Esquerdo', '${data['braco_esquerdo']} cm'),
-            buildRow('Coxa Direita', '${data['coxa_direita']} cm'),
-            buildRow('Coxa Esquerda', '${data['coxa_esquerda']} cm'),
-            buildRow('Gordura', '${data['gordura']} %'),
-            buildRow('Gênero', data['genero']),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            Color.fromRGBO(7, 59, 76, 0.9),
+            Color.fromRGBO(10, 87, 102, 0.9),
           ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(
+          color: Colors.blueAccent, // Cor de destaque da borda
+          width: 2.0,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      margin: const EdgeInsets.only(bottom: 16.0),
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          buildRow('Data da Medida', data['data_medida']),
+          buildRow('Peso', '${data['peso']} kg'),
+          buildRow('Altura', '${data['altura']} cm'),
+          buildRow('Cintura', '${data['cintura']} cm'),
+          buildRow('Quadril', '${data['quadril']} cm'),
+          buildRow('Peito', '${data['peito']} cm'),
+          buildRow('Braço Direito', '${data['braco_direito']} cm'),
+          buildRow('Braço Esquerdo', '${data['braco_esquerdo']} cm'),
+          buildRow('Coxa Direita', '${data['coxa_direita']} cm'),
+          buildRow('Coxa Esquerda', '${data['coxa_esquerda']} cm'),
+          buildRow('Gordura', '${data['gordura']} %'),
+          buildRow('Gênero', data['genero']),
+        ],
       ),
     );
   }
@@ -153,7 +168,7 @@ class _DadosState extends State<Dados> {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Color.fromRGBO(7, 59, 76, 1),
+                color: Colors.white, // Cor branca para o label
               ),
             ),
           ),
@@ -163,7 +178,7 @@ class _DadosState extends State<Dados> {
               textAlign: TextAlign.right,
               style: const TextStyle(
                 fontSize: 16,
-                color: Colors.black87,
+                color: Colors.white, // Cor branca para o valor
               ),
             ),
           ),
